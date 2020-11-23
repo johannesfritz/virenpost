@@ -105,11 +105,11 @@ for(level in seq(interval,2.5,interval)){
 
 bauch.r0.pop=ggplot(subset(r0.pop, date %in% dates.of.interest), aes(x=r0, y=round(AnzEinwohner/1000,0), colour=as.factor(date)))+
   geom_line(size=1.2)+
-  scale_y_continuous(breaks=seq(250, 9000,250), 
+  scale_y_continuous(breaks=seq(500, 9000,500), 
                      labels=function(x) format(x, big.mark = "'", scientific = FALSE))+
   scale_x_continuous(breaks=seq(0,2.5,.25), limits = c(0,2.5))+
   scale_colour_manual(values=my.colors)+
-  labs(colour="Stichtag",x="Schätzung des R0 auf Bezirksebene",y="Anzahl Einwohner in Bezirken mit einem R0 kleiner X")+
+  labs(colour=NULL,x="Schätzung des R0 auf Bezirksebene",y="Anzahl Einwohner in Bezirken mit einem R0 kleiner X\n(in Tausend)")+
   gta_theme()+
   geom_vline(aes(xintercept=0.5),
              color=gta_colour$green.shades(3)[2], linetype="dashed", size=1)+
@@ -117,7 +117,7 @@ bauch.r0.pop=ggplot(subset(r0.pop, date %in% dates.of.interest), aes(x=r0, y=rou
              color=gta_colour$amber.shades(3)[2], linetype="dashed", size=1)+
   geom_vline(aes(xintercept=1.5),
              color=gta_colour$red.shades(3)[1], linetype="dashed", size=1)+
-  ggtitle("Vor dem Lockdown lebten fast 7 Mio. Einwohner in Bezirken mit fallenden Neuansteckungen", subtitle = "Basierend auf den Positivtests publiziert bis")
+  ggtitle("Vor dem Lockdown lebten fast 7 Mio. Einwohner in Bezirken\nmit fallenden Neuansteckungen", subtitle = "Basierend auf den Positivtests publiziert bis")
 
 
 gta_plot_saver(plot=bauch.r0.pop,
