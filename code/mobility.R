@@ -12,14 +12,25 @@ mobility.google="https://www.gstatic.com/covid19/mobility/Region_Mobility_Report
 google.zip="temp/Google mobility by region.zip"
 
 GET(mobility.google, write_disk(google.zip, overwrite=TRUE))
-unzip(zipfile = google.zip, files = c("2020_AT_Region_Mobility_Report.csv", "2020_CH_Region_Mobility_Report.csv"), exdir = "temp")
+unzip(zipfile = google.zip, files = c("2021_AT_Region_Mobility_Report.csv", "2021_CH_Region_Mobility_Report.csv",
+                                      "2020_AT_Region_Mobility_Report.csv", "2020_CH_Region_Mobility_Report.csv"), exdir = "temp")
+
+mob.ggl.aut=read.csv("temp/2021_AT_Region_Mobility_Report.csv", stringsAsFactors=F)
+mob.ggl.aut$sub_region_1[mob.ggl.aut$sub_region_1==""]="Österreich"
+mob.ggl.ch=read.csv("temp/2021_CH_Region_Mobility_Report.csv", stringsAsFactors=F)
+mob.ggl.ch$sub_region_1[mob.ggl.ch$sub_region_1==""]="Schweiz"
+mob.ggl=rbind(mob.ggl.aut,
+              mob.ggl.ch)
 
 mob.ggl.aut=read.csv("temp/2020_AT_Region_Mobility_Report.csv", stringsAsFactors=F)
 mob.ggl.aut$sub_region_1[mob.ggl.aut$sub_region_1==""]="Österreich"
 mob.ggl.ch=read.csv("temp/2020_CH_Region_Mobility_Report.csv", stringsAsFactors=F)
 mob.ggl.ch$sub_region_1[mob.ggl.ch$sub_region_1==""]="Schweiz"
-mob.ggl=rbind(mob.ggl.aut,
+mob.ggl=rbind(mob.ggl,
+              mob.ggl.aut,
               mob.ggl.ch)
+
+
 do.call(file.remove, list(list.files("temp", full.names = TRUE)[! grepl("zip$",list.files("temp", full.names = TRUE))]))
 
 
@@ -63,7 +74,7 @@ ggl.rec$wochentag=weekdays(ggl.rec$date)
 
 
 
-plot.cutoff.aug="2020-09-15"
+plot.cutoff.aug="2020-02-26"
 for(bl in unique(ggl.rec$land)){
   ggl.rec$rec.norm.aug[ggl.rec$land==bl]=ggl.rec$rec.x[ggl.rec$land==bl]/mean(ggl.rec$rec.x[ggl.rec$date>=plot.cutoff.aug & ggl.rec$date<=(as.Date(plot.cutoff.aug)+2) & ggl.rec$land==bl], na.rm=T)
   ggl.rec$res.norm.aug[ggl.rec$land==bl]=ggl.rec$res.x[ggl.rec$land==bl]/mean(ggl.rec$res.x[ggl.rec$date>=plot.cutoff.aug & ggl.rec$date<=(as.Date(plot.cutoff.aug)+2) & ggl.rec$land==bl], na.rm=T)
@@ -87,17 +98,18 @@ ggl.long$variable[ggl.long$variable=="work.norm.aug"]="Arbeitsstätten"
 ggl.long$variable[ggl.long$variable=="groc.norm.aug"]="Supermärkte & Apotheken"
 ggl.long$variable[ggl.long$variable=="groc.oeffi.aug"]="Öffentlicher Verkehr"
 
-mob.national=ggplot(subset(ggl.long, date>="2020-08-01" & wochentag=="Mittwoch" & land %in% c("Schweiz","Österreich")), 
+mob.national=ggplot(subset(ggl.long, date>="2021-01-01" & wochentag=="Mittwoch" & land %in% c("Schweiz","Österreich")), 
                     aes(x=date, y=value, colour=land))+
   geom_line(size=1.1)+
   facet_wrap(~ variable)+
-  geom_vline(xintercept = c(as.numeric(as.Date("2020-09-21","%Y-%m-%d")), 
-                            as.numeric(as.Date("2020-11-03","%Y-%m-%d")),
-                            as.numeric(as.Date("2020-11-17","%Y-%m-%d")), as.numeric(as.Date("2020-12-26","%Y-%m-%d"))), colour=gta_colour$blue[1], linetype=3)+
+  # geom_vline(xintercept = c(as.numeric(as.Date("2020-09-21","%Y-%m-%d")), 
+  #                           as.numeric(as.Date("2020-11-03","%Y-%m-%d")),
+  #                           as.numeric(as.Date("2020-11-17","%Y-%m-%d")), as.numeric(as.Date("2020-12-26","%Y-%m-%d"))), colour=gta_colour$blue[1], linetype=3)+
+  geom_hline(yintercept = 1, colour=gta_colour$blue[1], linetype=3)+
   gta_theme()+
   scale_colour_manual(values=c(gta_colour$blue[2], gta_colour$desert[2]))+
-  labs(colour="",x="Datum",y="Aktivitätsniveau\n(Basis: 15.9.2020 = 1)")+
-  scale_y_continuous(sec.axis = dup_axis(), limits=c(0.25,1.5), breaks=seq(.25,1.5,.25))+
+  labs(colour="",x="Datum",y="Aktivitätsniveau\n(Basis: 24.02.2020 = 1)")+
+  scale_y_continuous(sec.axis = dup_axis(), limits=c(0.25,1.6), breaks=seq(.25,1.6,.25))+
   ggtitle("Aktivitätsniveau national", subtitle = "(laut Google; mittwochs)")
 
 gta_plot_saver(plot=mob.national,
@@ -108,17 +120,18 @@ gta_plot_saver(plot=mob.national,
 
 
 
-mob.subnational=ggplot(subset(ggl.long, date>="2020-08-01" & wochentag=="Mittwoch" & land %in% c("Vorarlberg","St. Gallen")), 
+mob.subnational=ggplot(subset(ggl.long, date>="2021-01-01" & wochentag=="Mittwoch" & land %in% c("Vorarlberg","St. Gallen")), 
                     aes(x=date, y=value, colour=land))+
   geom_line(size=1.1)+
   facet_wrap(~ variable)+
-  geom_vline(xintercept = c(as.numeric(as.Date("2020-09-21","%Y-%m-%d")), 
-                            as.numeric(as.Date("2020-11-03","%Y-%m-%d")),
-                            as.numeric(as.Date("2020-11-17","%Y-%m-%d")), as.numeric(as.Date("2020-12-26","%Y-%m-%d"))), colour=gta_colour$blue[1], linetype=3)+
+  # geom_vline(xintercept = c(as.numeric(as.Date("2020-09-21","%Y-%m-%d")), 
+  #                           as.numeric(as.Date("2020-11-03","%Y-%m-%d")),
+  #                           as.numeric(as.Date("2020-11-17","%Y-%m-%d")), as.numeric(as.Date("2020-12-26","%Y-%m-%d"))), colour=gta_colour$blue[1], linetype=3)+
+  geom_hline(yintercept = 1, colour=gta_colour$blue[1], linetype=3)+
   gta_theme()+
-  scale_colour_manual(values=c(gta_colour$desert[2], gta_colour$blue[2]))+
-  labs(colour="",x="Datum",y="Aktivitätsniveau\n(Basis: 15.9.2020 = 1)")+
-  scale_y_continuous(sec.axis = dup_axis(), limits=c(0.25,1.5), breaks=seq(.25,1.5,.25))+
+  scale_colour_manual(values=c(gta_colour$blue[2], gta_colour$desert[2]))+
+  labs(colour="",x="Datum",y="Aktivitätsniveau\n(Basis: 24.02.2020 = 1)")+
+  scale_y_continuous(sec.axis = dup_axis(), limits=c(0.25,1.6), breaks=seq(.25,1.6,.25))+
   ggtitle("Aktivitätsniveau Transrhenubien", subtitle = "(laut Google; mittwochs)")
 
 gta_plot_saver(plot=mob.subnational,
